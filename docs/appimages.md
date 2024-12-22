@@ -3,4 +3,4 @@
 
 ## Splash Screen
 
-![Spalsh](img/App1 (1).jpeg)
+![Spalsh](https://github.com/PasanSWijekoon/Axious-Document/blob/main/docs/img/App1%20(1).jpeg?raw=true)
