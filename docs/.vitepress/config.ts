@@ -61,12 +61,11 @@ export default {
         ],
       },
       {
-        text: "Code Implementation",
+        text: "Implementation",
         collapsible: true,
         items: [
           { text: "Arduino Code", link: "/arduinocode" },
-          { text: "PHP Script", link: "/phpscript" },
-          { text: "Frontend UI", link: "/frontendui" },
+          { text: "App Images And Harware", link: "/appimages" },
         ],
       },
       {
