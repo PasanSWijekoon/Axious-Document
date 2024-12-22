@@ -7,4 +7,4 @@
 
 ## LogIn Screen
 
-![Spalsh]([https://github.com/PasanSWijekoon/Axious-Document/blob/main/docs/img/App1%20(1).jpeg?raw=true](https://github.com/PasanSWijekoon/Axious-Document/blob/main/docs/img/login.jpeg))
+![Spalsh](https://github.com/PasanSWijekoon/Axious-Document/blob/main/docs/img/login.jpeg?raw=true)
