@@ -33,12 +33,12 @@ The **Tea Weight Scale System Prototype** consists of three key components:
    - An LCD display for showing the current weight to supervisors.
    - A push button for confirming the weight after verification.
 
-2. **Web Interface**:
-   - A responsive web-based frontend built with **Vite.js** and **Tailwind CSS**.
+2. **Android Frontend**:
+   - A responsive Mobile Application with React Native.
    - Features for entering employee IDs, displaying tea weights, and saving records to the database.
 
 3. **Backend & Database**:
-   - A **PHP**-based backend that handles data transmission and storage.
+   - A **Java EE**-based backend that handles data transmission and storage.
    - A **MySQL** database to store tea weight records, allowing for efficient data retrieval and reporting.
 
 ---
