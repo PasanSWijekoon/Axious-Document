@@ -9,109 +9,104 @@ The following section describes the **database design** for the **Tea Weight Sca
 
 ![ER](img/er.png)
 
-### **1. Database Schema: `weight_db`**
-The schema `weight_db` is created to manage all the database objects for the Tea Weight Scale System. This schema contains three key tables: `employees`, `save_weights`, and `order`.
+
+### **Entities and Their Attributes**
+
+1. **Supervisor Table**:
+   - **Purpose**: Stores information about supervisors who manage employees and oversee weight-related operations.
+   - **Attributes**:
+     - `id`: Primary key. Unique identifier for each supervisor.
+     - `mobile`: Mobile number of the supervisor.
+     - `first_name`: Supervisor's first name.
+     - `last_name`: Supervisor's last name.
+     - `password`: Encrypted password for the supervisor's account (likely used for authentication in the system).
+     - `registered_date`: Date when the supervisor was added to the system.
+   - **Relationships**:
+     - One supervisor can manage multiple employees (**Supervisor to Employees**, one-to-many).
+     - A supervisor can be associated with multiple weight entries recorded in the **Save_Weights** table.
 
 ---
 
-### **2. Table: `employees`**
-
-- **Purpose**: Stores information about the employees (e.g., tea pluckers).
-- **Structure**:
-  - `empid` (INT, AUTO_INCREMENT): The unique identifier for each employee. This is the **Primary Key** of the table.
-  - `name` (VARCHAR(100)): The name of the employee. This field is optional (can be `NULL`).
-
-- **Primary Key**:
-  - `empid`: Ensures that each employee has a unique identifier.
-
-```sql
-CREATE TABLE IF NOT EXISTS `weight_db`.`employees` (
-  `empid` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NULL,
-  PRIMARY KEY (`empid`)
-) ENGINE = InnoDB;
-```
+2. **Employees Table**:
+   - **Purpose**: Stores details about employees who perform weight-related operations and report to supervisors.
+   - **Attributes**:
+     - `empid`: Primary key. Unique identifier for each employee.
+     - `first_name`: Employee's first name.
+     - `last_name`: Employee's last name.
+     - `mobile`: Mobile number of the employee.
+     - `nic`: National Identification Card number of the employee (for legal/identification purposes).
+     - `registered_date`: Date when the employee was added to the system.
+     - `Supervisor_id`: Foreign key linking to the **Supervisor** table, indicating the supervisor responsible for the employee.
+   - **Relationships**:
+     - Each employee is assigned to one supervisor (**Employees to Supervisor**, many-to-one).
+     - An employee can have multiple weight recordings linked in the **Save_Weights** table (**Employees to Save_Weights**, one-to-many).
 
 ---
 
-### **3. Table: `save_weights`**
-
-- **Purpose**: Stores the tea weight measurements for each employee and records the timestamp when the weight was recorded.
-- **Structure**:
-  - `id` (INT, AUTO_INCREMENT): A unique identifier for each weight record. This is the **Primary Key** of the table.
-  - `weight_value` (FLOAT): The actual weight of the tea collected. This field is optional (can be `NULL`).
-  - `timestamp` (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP): The time when the weight was recorded.
-  - `employees_empid` (INT): A foreign key that links to the `empid` field in the `employees` table, associating the recorded weight with the specific employee.
-
-- **Primary Key**:
-  - `id`: Uniquely identifies each weight entry.
-
-- **Indexes and Foreign Keys**:
-  - An **index** (`fk_weights_employees_idx`) is created on the `employees_empid` field to improve query performance.
-  - A **Foreign Key Constraint** (`fk_weights_employees`) is established between the `employees_empid` field and the `empid` field of the `employees` table. This enforces referential integrity, ensuring that weight entries are only associated with valid employees.
-  - **ON DELETE NO ACTION** and **ON UPDATE NO ACTION** ensure that no cascading operations are performed on weight records when an employee's record is updated or deleted.
-
-```sql
-CREATE TABLE IF NOT EXISTS `weight_db`.`save_weights` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `weight_value` FLOAT NULL,
-  `timestamp` TIMESTAMP NULL DEFAULT current_timestamp(),
-  `employees_empid` INT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_weights_employees_idx` (`employees_empid` ASC) VISIBLE,
-  CONSTRAINT `fk_weights_employees`
-    FOREIGN KEY (`employees_empid`)
-    REFERENCES `weight_db`.`employees` (`empid`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-) ENGINE = InnoDB;
-```
+3. **Weights Table**:
+   - **Purpose**: Tracks raw weight measurements recorded in the system.
+   - **Attributes**:
+     - `id`: Primary key. Unique identifier for each weight entry.
+     - `weight_value`: The actual weight value recorded (e.g., in kilograms or pounds).
+     - `timestamp`: Date and time when the weight was measured or logged.
+   - **Relationships**:
+     - Serves as a reference for weight recordings that may be linked to multiple entries in the **Save_Weights** table (**Weights to Save_Weights**, one-to-many).
 
 ---
 
-### **4. Table: `order`**
-
-- **Purpose**: Stores information about the orders placed by employees, including the timestamp of the order and the employee who placed the order.
-- **Structure**:
-  - `id` (INT, AUTO_INCREMENT): A unique identifier for each order. This is the **Primary Key** of the table.
-  - `timestamp` (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP): The time when the order was placed.
-  - `employees_empid` (INT): A foreign key that links to the `empid` field in the `employees` table, associating the order with the specific employee who placed it.
-
-- **Primary Key**:
-  - `id`: Uniquely identifies each order.
-
-- **Indexes and Foreign Keys**:
-  - An **index** (`fk_order_employees1_idx`) is created on the `employees_empid` field to optimize queries.
-  - A **Foreign Key Constraint** (`fk_order_employees1`) is established between the `employees_empid` field and the `empid` field of the `employees` table. This ensures that orders are only associated with valid employees.
-  - **ON DELETE NO ACTION** and **ON UPDATE NO ACTION** prevent cascading updates or deletes on the associated employee records.
-
-```sql
-CREATE TABLE IF NOT EXISTS `weight_db`.`order` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `timestamp` TIMESTAMP NULL DEFAULT current_timestamp(),
-  `employees_empid` INT NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_order_employees1_idx` (`employees_empid` ASC) VISIBLE,
-  CONSTRAINT `fk_order_employees1`
-    FOREIGN KEY (`employees_empid`)
-    REFERENCES `weight_db`.`employees` (`empid`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-) ENGINE = InnoDB;
-```
+4. **Save_Weights Table**:
+   - **Purpose**: Serves as a detailed log of weight entries, linking specific weights to employees, supervisors, and orders.
+   - **Attributes**:
+     - `id`: Primary key. Unique identifier for each log entry.
+     - `weight_value`: The weight value recorded for the specific entry.
+     - `timestamp`: Date and time when the weight was recorded.
+     - `employees_empid`: Foreign key linking to the **Employees** table, identifying which employee recorded this weight.
+     - `order_id`: Identifier for the specific order associated with this weight entry (useful in scenarios where weights are linked to specific transactions or shipments).
+     - `Supervisor_id`: Foreign key linking to the **Supervisor** table, identifying which supervisor oversaw the weight recording.
+   - **Relationships**:
+     - Each weight entry is linked to one employee (**Save_Weights to Employees**, many-to-one).
+     - Each weight entry is linked to one supervisor (**Save_Weights to Supervisor**, many-to-one).
+     - Each weight entry can reference a specific raw weight entry (**Save_Weights to Weights**, many-to-one).
 
 ---
 
-## **Summary of Database Design**
+### **Relationships Overview**
+1. **Supervisor to Employees**:
+   - One supervisor can manage multiple employees.
+   - `Supervisor_id` in the **Employees** table establishes this relationship.
 
-- **Schema**: `weight_db`
-  - Contains the tables `employees`, `save_weights`, and `order`.
+2. **Employees to Save_Weights**:
+   - One employee can be responsible for multiple weight recordings.
+   - `employees_empid` in the **Save_Weights** table links each entry to a specific employee.
 
-- **Table Relationships**:
-  - The `save_weights` and `order` tables are related to the `employees` table via **foreign keys**. Both tables store `employees_empid` as a reference to the primary key (`empid`) in the `employees` table.
+3. **Supervisor to Save_Weights**:
+   - One supervisor can oversee multiple weight entries recorded in the **Save_Weights** table.
+   - `Supervisor_id` in the **Save_Weights** table links each entry to a specific supervisor.
 
-- **Referential Integrity**:
-  - Ensured by foreign key constraints, which maintain consistency between employee records and the weight/order data.
+4. **Weights to Save_Weights**:
+   - One weight entry in the **Weights** table can be referenced by multiple entries in the **Save_Weights** table.
+   - `weight_value` and `timestamp` are common attributes that may help correlate raw weights with saved records.
 
-- **Indexing**:
-  - Indexes are added on foreign key fields to optimize query performance when accessing related data (e.g., querying weight records for a specific employee).
+---
+
+### **Possible Use Case Scenarios**
+1. **Supervisory Oversight**:
+   - Supervisors manage employees and oversee the weights they record.
+   - The system can track which supervisor is responsible for a given weight entry.
+
+2. **Employee Performance Monitoring**:
+   - The system logs weights recorded by each employee, enabling performance reviews or identifying errors.
+
+3. **Order Management**:
+   - Weight entries in the **Save_Weights** table are linked to specific orders via the `order_id` attribute. This can help with shipment tracking or invoicing.
+
+4. **Historical Data and Reporting**:
+   - The **Weights** table provides raw weight data, while the **Save_Weights** table acts as a detailed log, enabling reports based on timestamps, employees, supervisors, or orders.
+
+5. **Security and Accountability**:
+   - Each weight entry is tied to a specific employee and supervisor, ensuring accountability for errors or discrepancies.
+
+---
+
+### **Overall Summary**
+The database is designed to support a weight tracking system where supervisors oversee employees who log weight entries for various orders. The system provides hierarchical relationships (supervisors to employees) and detailed tracking of weights linked to orders, with a clear audit trail through the **Save_Weights** table. This structure ensures accountability, transparency, and efficient management of weight-related operations.
